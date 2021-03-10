@@ -23,6 +23,7 @@ void main() {
     normal = m_normal * normalize(in_normal);
     light_dir = (m_view * vec4(lightDir, 0.0)).xyz;
     ShadowCoord = m_shadow_bias * vec4(in_position, 1.0);
+    //ShadowCoord = m_shadow_bias * vec4(1.0, 1.0, 2.0, 1.0);
 }
 
 #elif defined FRAGMENT_SHADER

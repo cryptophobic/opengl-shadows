@@ -83,8 +83,8 @@ class ShadowMapping(CameraWindow):
         self.wall.render(self.shadowmap_program)
         self.cube.render(self.shadowmap_program)
 
-        rotation = Matrix44.from_eulers((0.0, 0.0, 0.0), dtype='f4')
-        translation = Matrix44.from_translation((0.0, 0.0, 0.0), dtype='f4')
+        rotation = Matrix44.from_eulers((2.0, 0.0, 0.0), dtype='f4')
+        translation = Matrix44.from_translation((0.0, 1.0, 0.0), dtype='f4')
         modelview = translation * rotation
 
         self.another_wall.render(self.shadowmap_program)
@@ -118,8 +118,9 @@ class ShadowMapping(CameraWindow):
         self.floor.render(self.basic_light)
         self.wall.render(self.basic_light)
         self.cube.render(self.basic_light)
-        self.another_wall.render(self.basic_light)
         self.sphere.render(self.basic_light)
+        self.basic_light['m_model'].write(modelview)
+        self.another_wall.render(self.basic_light)
 
         # Render the sun position
         self.sun_prog['m_proj'].write(self.camera.projection.matrix)
