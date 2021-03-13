@@ -46,27 +46,17 @@ class ShadowMapping(CameraWindow):
         self.sun = geometry.sphere(radius=1.0)
 
         # Programs
-        self.raw_depth_prog = self.load_program('programs/shadow_mapping/raw_depth.glsl')
         self.basic_light = self.load_program('programs/shadow_mapping/directional_light.glsl')
         self.basic_light['shadowMap'].value = 0
         self.basic_light['color'].value = 1.0, 1.0, 1.0, 1.0
-        self.weird_light = self.load_program('programs/shadow_mapping/directional_light.glsl')
-        self.weird_light['shadowMap'].value = 0
-        self.weird_light['color'].value = 1.0, 1.0, 1.0, 1.0
         self.shadowmap_program = self.load_program('programs/shadow_mapping/shadowmap.glsl')
-        self.texture_prog = self.load_program('programs/texture.glsl')
-        self.texture_prog['texture0'].value = 0
         self.sun_prog = self.load_program('programs/cube_simple.glsl')
         self.sun_prog['color'].value = 1, 1, 0, 1
         self.lightpos = 0, 0, 0
 
-        self.proge = self.load_program('programs/shadow_mapping/shadowmap.glsl')
-        # self.proge['color'].value = 1.0, 1.0, 1.0, 1.0
-
-
     def render(self, time, frametime):
         self.ctx.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
-        self.lightpos = Vector3((math.sin(time) * 20, 15, math.cos(time) * 20), dtype='f4')
+        self.lightpos = Vector3((math.sin(time) * 20, 15, math.cos(time) * 10), dtype='f4')
         # self.lightpos = Vector3((20, 15, 20), dtype='f4')
         scene_pos = Vector3((0, 0, 0), dtype='f4')
 
@@ -88,8 +78,6 @@ class ShadowMapping(CameraWindow):
         modelview = translation * rotation
 
         self.another_wall.render(self.shadowmap_program)
-
-        #self.another_wall.render(self.shadowmap_program)
         self.sphere.render(self.shadowmap_program)
 
         # --- PASS 2: Render scene to screen
@@ -107,12 +95,6 @@ class ShadowMapping(CameraWindow):
 
         self.basic_light['m_shadow_bias'].write(matrix44.multiply(depth_mvp, bias_matrix))
         self.basic_light['lightDir'].write(self.lightpos)
-
-        self.weird_light['m_proj'].write(self.camera.projection.matrix)
-        self.weird_light['m_camera'].write(self.camera.matrix)
-        self.weird_light['m_model'].write(modelview)
-        self.weird_light['m_shadow_bias'].write(matrix44.multiply(depth_mvp, bias_matrix))
-        self.weird_light['lightDir'].write(self.lightpos)
 
         self.offscreen_depth.use(location=0)
         self.floor.render(self.basic_light)

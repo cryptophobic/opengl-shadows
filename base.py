@@ -9,6 +9,8 @@ class CameraWindow(mglw.WindowConfig):
         super().__init__(**kwargs)
         self.camera = KeyboardCamera(self.wnd.keys, aspect_ratio=self.wnd.aspect_ratio)
         self.camera_enabled = True
+        self.camera.set_position(-10, 35, 0)
+        self.camera.set_rotation(40, -80)
 
     def key_event(self, key, action, modifiers):
         keys = self.wnd.keys
