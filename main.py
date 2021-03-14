@@ -17,8 +17,6 @@ class ShadowMapping(CameraWindow):
     title = "Shadow Mapping"
     resource_dir = (Path(__file__) / '../resources').resolve()
 
-    print(resource_dir)
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.camera.projection.update(near=1, far=200)
@@ -41,7 +39,7 @@ class ShadowMapping(CameraWindow):
         self.floor = geometry.cube(size=(25.0, 1.0, 25.0))
         self.wall = geometry.cube(size=(1.0, 5, 25), center=(-12.5, 2, 0))
         self.another_wall = geometry.cube(size=(5, 1, 25), center=(0, 5, 0))
-        self.cube = geometry.cube(size=(2, 1, 5), center=(2, 5, -10))
+        self.another_blob = geometry.cube(size=(5, 5, 5), center=(-7, -5, 0))
         self.sphere = geometry.sphere(radius=5.0, sectors=64, rings=32)
         self.sun = geometry.sphere(radius=1.0)
 
@@ -68,17 +66,20 @@ class ShadowMapping(CameraWindow):
         depth_view = Matrix44.look_at(self.lightpos, (0, 0, 0), (0, 1, 0), dtype='f4')
         depth_mvp = depth_projection * depth_view
         self.shadowmap_program['mvp'].write(depth_mvp)
+        self.shadowmap_program['m_model'].write(Matrix44.from_translation(scene_pos, dtype='f4'))
 
         self.floor.render(self.shadowmap_program)
         self.wall.render(self.shadowmap_program)
-        self.cube.render(self.shadowmap_program)
 
-        rotation = Matrix44.from_eulers((2.0, 0.0, 0.0), dtype='f4')
-        translation = Matrix44.from_translation((0.0, 1.0, 0.0), dtype='f4')
-        modelview = translation * rotation
+        modelview = Matrix44.from_eulers((2.0, 0.0, 0.0), dtype='f4')
+        modelview_blob = Matrix44.from_eulers((3.0, 1.0, 2.0), dtype='f4')
+        # translation = Matrix44.from_translation((0.0, 1.0, 0.0), dtype='f4')
 
-        self.another_wall.render(self.shadowmap_program)
         self.sphere.render(self.shadowmap_program)
+        self.shadowmap_program['m_model'].write(modelview)
+        self.another_wall.render(self.shadowmap_program)
+        self.shadowmap_program['m_model'].write(modelview_blob)
+        self.another_blob.render(self.shadowmap_program)
 
         # --- PASS 2: Render scene to screen
         self.wnd.use()
@@ -99,10 +100,11 @@ class ShadowMapping(CameraWindow):
         self.offscreen_depth.use(location=0)
         self.floor.render(self.basic_light)
         self.wall.render(self.basic_light)
-        self.cube.render(self.basic_light)
         self.sphere.render(self.basic_light)
         self.basic_light['m_model'].write(modelview)
         self.another_wall.render(self.basic_light)
+        self.basic_light['m_model'].write(modelview_blob)
+        self.another_blob.render(self.basic_light)
 
         # Render the sun position
         self.sun_prog['m_proj'].write(self.camera.projection.matrix)
