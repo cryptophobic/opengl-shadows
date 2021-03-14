@@ -4,6 +4,7 @@ https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mappin
 """
 import math
 from pathlib import Path
+
 from pyrr import Matrix44, matrix44, Vector3
 
 import moderngl
@@ -38,7 +39,7 @@ class ShadowMapping(CameraWindow):
         # Scene geometry
         self.floor = geometry.cube(size=(25.0, 1.0, 25.0))
         self.wall = geometry.cube(size=(1.0, 5, 25), center=(-12.5, 2, 0))
-        self.another_blob = geometry.cube(size=(5, 5, 5), center=(-7, -5, 0))
+        self.another_blob = geometry.cube(size=(5, 5, 5), center=(-7, -10, 0))
         self.sphere = geometry.sphere(radius=5.0, sectors=64, rings=32)
         self.sun = geometry.sphere(radius=1.0)
 
@@ -53,7 +54,7 @@ class ShadowMapping(CameraWindow):
 
     def render(self, time, frametime):
         self.ctx.enable_only(moderngl.DEPTH_TEST | moderngl.CULL_FACE)
-        self.lightpos = Vector3((math.sin(time) * 20, 15, math.cos(time) * 10), dtype='f4')
+        self.lightpos = Vector3((math.sin(time) * 20, 15, math.cos(time) * 20), dtype='f4')
         scene_pos = Vector3((0, 0, 0), dtype='f4')
 
         # --- PASS 1: Render shadow map
@@ -70,7 +71,9 @@ class ShadowMapping(CameraWindow):
         self.wall.render(self.shadowmap_program)
         self.sphere.render(self.shadowmap_program)
 
-        modelview_blob = Matrix44.from_eulers((3.0, math.sin(time) * 1.0, math.sin(time) * 2.0), dtype='f4')
+        modelview_blob = Matrix44.from_eulers((3.0, math.sin(time) * 1.0, math.sin(time) * 1.0), dtype='f4')
+        # modelview_blob = Matrix44.from_eulers((3.0, 1.0, 2.0), dtype='f4')
+        # modelview_blob = Matrix44.from_eulers((0.0, 0.0, 0.0), dtype='f4')
         self.shadowmap_program['m_model'].write(modelview_blob)
         self.another_blob.render(self.shadowmap_program)
 
